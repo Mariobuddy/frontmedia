@@ -3,17 +3,14 @@ import { createGlobalStyle } from "styled-components";
 export const GlobalStyle = createGlobalStyle`
 
 :root{
-  --headbg:#0C0032;
-  --maincol:#4D004C;
-  --dim:#8d8d8d;
-  --dimblack:#1f1d1d;
+  --dimgray:#D3D3D3
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Poppins', sans-serif;
   text-decoration: none;
 
 /* 
