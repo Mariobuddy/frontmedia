@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const authorizedSlice = createSlice({
-  name: "authorizedSlice",
-  initialState: {},
+  name: "authorized",
+  initialState: {
+    },
   reducers: {},
 });
 

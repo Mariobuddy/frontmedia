@@ -4,6 +4,8 @@ import Mobile from "../../assests/mobile.png";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ImageTimer from "../../components/ImageTimer/ImageTimer";
+import Loader from "../../components/Loader/Loader";
+import { NavLink } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -25,13 +27,27 @@ const Login = () => {
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
+      emailSpan.current.style.color = "red";
+      emailSpan.current.textContent = newErrors.email;
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Invalid email format";
+      emailSpan.current.style.color = "red";
+      emailSpan.current.textContent = newErrors.email;
+    } else {
+      emailSpan.current.style.color = "#7c7e80";
+      emailSpan.current.textContent = "Enter Your Email";
     }
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
+      passwordSpan.current.style.color = "red";
+      passwordSpan.current.textContent = newErrors.password;
     } else if (formData.password.length < 6) {
       newErrors.password = "More than 6 characters required";
+      passwordSpan.current.textContent = newErrors.password;
+      passwordSpan.current.style.color = "red";
+    } else {
+      passwordSpan.current.style.color = "#7c7e80";
+      passwordSpan.current.textContent = "Enter Your Password";
     }
     errors = newErrors;
     setErrors(errors);
@@ -62,9 +78,16 @@ const Login = () => {
       }
     }
   };
-  const handSubmit=(e)=>{
+  const handSubmit = (e) => {
     e.preventDefault();
-  }
+    if (validationForm()) {
+      setLoadCir(false);
+      try {
+      } catch (error) {
+        return error;
+      }
+    }
+  };
   return (
     <Wrapper>
       <div className="img-Div">
@@ -81,7 +104,7 @@ const Login = () => {
                 onFocus={() => handFocus("email")}
                 onBlur={() => handBlur("email")}
                 type="text"
-                autoComplete="new-password"
+                autoComplete="off"
                 name="email"
                 onChange={handChange}
                 value={formData.email}
@@ -94,7 +117,7 @@ const Login = () => {
                 type="password"
                 onFocus={() => handFocus("password")}
                 onBlur={() => handBlur("password")}
-                autoComplete="new-password"
+                autoComplete="off"
                 name="password"
                 onChange={handChange}
                 ref={Inp}
@@ -114,12 +137,13 @@ const Login = () => {
               Log in
             </Button>
           </form>
+          <span style={{display:loadCir?"none":"block",position:"absolute",bottom:"3rem"}}><Loader/></span>
           <button className="login-button">Forgot password?</button>
         </div>
         <div className="login-bottom">
           <span>
-            Don't have an account?
-            <button className="login-dont"> Sign up</button>
+            Don't have an account?{" "}
+            <NavLink to={"/register"}><button className="login-dont"> Sign up</button></NavLink>
           </span>
         </div>
       </div>
@@ -199,6 +223,7 @@ const Wrapper = styled.div`
       justify-content: space-around;
       align-items: center;
       flex-direction: column;
+      position: relative;
 
       > p {
         font-family: "Rouge Script", cursive;
@@ -218,7 +243,7 @@ const Wrapper = styled.div`
           width: 90%;
           height: 4rem;
           border: 2px solid var(--dimgray);
-          margin-bottom: 1rem;
+          margin-bottom: 2rem;
           display: flex;
           justify-content: flex-start;
           padding-left: 2rem;
@@ -228,7 +253,7 @@ const Wrapper = styled.div`
             color: #7c7e80;
             font-size: 1.3rem;
             position: absolute;
-            transition: all 0.2s ease;
+            transition: top 0.2s ease;
             z-index: 2;
             top: 0.8rem;
           }
