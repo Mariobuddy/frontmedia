@@ -1,12 +1,17 @@
 import React, { lazy, Suspense, useState, useEffect } from "react";
 import styled from "styled-components";
+import ProtectedRoutes from "./components/Protected Routes/ProtectedRoutes";
+import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Loader from "./components/Loader/Loader";
 const LazyLogin = lazy(() => import("./nav/Login/Login"));
+const LazyHome = lazy(() => import("./nav/Home/Home"));
 const LazyRegistration = lazy(() => import("./nav/Registration/Registraton"));
 
 const App = () => {
+  const { isAuth } = useSelector((state) => state.authorized);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -40,9 +45,31 @@ const App = () => {
       </div>
       <Router>
         <Routes>
+          {/* -----------------------------------Protected Routes--------------------------------------- */}
+
+          <Route path="/protected" element={<ProtectedRoutes isAuth={isAuth}/>}>
+            <Route
+              exact
+              path="home"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyHome />
+                </Suspense>
+              }
+            />
+          </Route>
+
+          {/* -----------------------------------Protected Routes End------------------------------------ */}
+
           <Route
             exact
-            path="/login"
+            path="/"
             element={
               <Suspense
                 fallback={

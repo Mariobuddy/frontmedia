@@ -1,9 +1,12 @@
-import React from 'react'
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoutes = () => {
-  return (
-    <div>ProtectedRoutes</div>
-  )
-}
+const ProtectedRoutes = ({ children, isAuth }) => {
+  if (!isAuth) {
+    return <Navigate to={"/login"} />;
+  }
 
-export default ProtectedRoutes
+  return children ? children : <Outlet />;
+};
+
+export default ProtectedRoutes;

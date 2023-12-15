@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -12,6 +12,29 @@ import { base_url_front } from "./../../components/Base_Url/Base_Url";
 import { useNavigate } from "react-router-dom";
 
 const Registraton = () => {
+  const handOtp = async () => {
+    const newOTP = Math.floor(100000 + Math.random() * 900000);
+    if (newOTP && formData.email) {
+      toast("Otp send");
+      try {
+        const res = await fetch(`${base_url_front}/otp/sendotp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ otp: newOTP, email: formData.email }),
+        });
+        const data = await res.json();
+        if (res.status === 200) {
+        } else if (data.message === "All fields are required") {
+          toast(data.message);
+        }
+      } catch (error) {
+        return error;
+      }
+    }
+  };
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -20,6 +43,7 @@ const Registraton = () => {
     name: "",
     cpassword: "",
     avatar: "",
+    otp: "",
   });
   const [loadCir, setLoadCir] = useState(true);
   let [errors, setErrors] = useState({});
@@ -28,17 +52,8 @@ const Registraton = () => {
   let nameSpan = useRef("");
   let surnameSpan = useRef("");
   let cpasswordSpan = useRef("");
+  let otpSpan = useRef("");
   let Inp = useRef("");
-
-  useEffect(() => {
-    if (Inp.current.length === undefined) {
-      passwordSpan.current.style.top = "-1rem";
-      emailSpan.current.style.top = "-1rem";
-      cpasswordSpan.current.style.top = "-1rem";
-      nameSpan.current.style.top = "-1rem";
-      surnameSpan.current.style.top = "-1rem";
-    }
-  }, []);
 
   let validationForm = () => {
     const newErrors = {};
@@ -107,7 +122,22 @@ const Registraton = () => {
     if (!formData.avatar) {
       newErrors.avatar = "Please upload image";
     }
-
+    if (!formData.otp.trim()) {
+      newErrors.otp = "Otp is required";
+      otpSpan.current.textContent = newErrors.otp;
+      otpSpan.current.style.color = "red";
+    } else if (isNaN(formData.otp)) {
+      newErrors.otp = "Otp must be numeric";
+      otpSpan.current.textContent = newErrors.otp;
+      otpSpan.current.style.color = "red";
+    } else if (formData.otp.length !== 6) {
+      newErrors.otp = "Otp must be at least 6 no";
+      otpSpan.current.textContent = newErrors.otp;
+      otpSpan.current.style.color = "red";
+    } else {
+      otpSpan.current.style.color = "#7c7e80";
+      otpSpan.current.textContent = "Enter Your Otp";
+    }
     errors = newErrors;
     setErrors(errors);
     return Object.keys(newErrors).length === 0;
@@ -129,6 +159,8 @@ const Registraton = () => {
       nameSpan.current.style.top = "-1rem";
     } else if (type === "surname") {
       surnameSpan.current.style.top = "-1rem";
+    } else if (type === "otp") {
+      otpSpan.current.style.top = "-1rem";
     }
   };
 
@@ -153,6 +185,10 @@ const Registraton = () => {
       if (formData.surname.length === 0) {
         surnameSpan.current.style.top = "0.8rem";
       }
+    } else if (type === "otp") {
+      if (formData.otp.length === 0) {
+        otpSpan.current.style.top = "0.8rem";
+      }
     }
   };
   const handSubmit = async (e) => {
@@ -174,20 +210,22 @@ const Registraton = () => {
         if (res.status === 200) {
           setLoadCir(true);
           toast("Registration Sucessfull");
-          navigate("/login");
+          navigate("/");
           setFormData({
             name: "",
             surname: "",
             password: "",
             cpassword: "",
             email: "",
-            avatar: null,
+            avatar: "",
+            otp: "",
           });
         } else if (
           data.message === "Email already exists" ||
           data.message === "All fields are required" ||
           data.message === "Passwords do not match" ||
-          data.message === "Internal server error"
+          data.message === "Internal server error" ||
+          data.message === "Otp is wrong"
         ) {
           setLoadCir(true);
           toast(data.message);
@@ -271,6 +309,18 @@ const Registraton = () => {
                 value={formData.email}
                 ref={Inp}
               />
+              <Button
+                variant="primary" // Change this to customize the button color
+                style={{
+                  borderRadius: "5px", // Example: set border radius
+                  fontSize: "14px", // Example: set font size
+                  width: "14rem",
+                  height: "3.5rem",
+                }}
+                onClick={handOtp}
+              >
+                Send Otp
+              </Button>
             </div>
             <div className="login-out">
               <span ref={passwordSpan}>Enter Your Password</span>
@@ -299,7 +349,7 @@ const Registraton = () => {
               />
             </div>
             <div className="login-out">
-              <span ref={cpasswordSpan}>Enter Your Otp</span>
+              <span ref={otpSpan}>Enter Your Otp</span>
               <input
                 type="text"
                 onFocus={() => handFocus("otp")}
@@ -308,13 +358,9 @@ const Registraton = () => {
                 name="otp"
                 onChange={handChange}
                 ref={Inp}
-                value={formData.cpassword}
+                value={formData.otp}
               />
             </div>
-            <p className="plogin">
-              People who use our service may have uploaded your contact
-              information to Mario Media .{" "}
-            </p>
             <p className="plogin">
               By signing up, you agree to our Terms , Privacy Policy and Cookies
               Policy .
@@ -336,7 +382,7 @@ const Registraton = () => {
             style={{
               display: loadCir ? "none" : "block",
               position: "absolute",
-              bottom: "4rem",
+              bottom: "9.4rem",
             }}
           >
             <Loader />
@@ -345,7 +391,7 @@ const Registraton = () => {
         <div className="login-bottom">
           <span>
             Have an account?{" "}
-            <NavLink to={"/login"}>
+            <NavLink to={"/"}>
               <button className="login-dont"> Log in</button>
             </NavLink>
           </span>
@@ -403,7 +449,7 @@ const Wrapper = styled.div`
       align-items: center;
       flex-direction: column;
       position: relative;
-      padding: 2rem 0rem;
+      padding-bottom: 2rem;
 
       > p {
         font-family: "Rouge Script", cursive;
@@ -465,7 +511,7 @@ const Wrapper = styled.div`
             position: absolute;
             transition: top 0.2s ease;
             z-index: 2;
-            top: 0.8rem;
+            top: -1rem;
           }
           input {
             width: 100%;

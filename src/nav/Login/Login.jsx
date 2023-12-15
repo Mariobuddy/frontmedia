@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import Mobile from "../../assests/mobile.png";
 import { Button } from "react-bootstrap";
@@ -6,21 +6,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ImageTimer from "../../components/ImageTimer/ImageTimer";
 import Loader from "../../components/Loader/Loader";
 import { NavLink } from "react-router-dom";
+import { base_url_front } from "./../../components/Base_Url/Base_Url";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getToken } from "../../redux/reducers/authorized";
 
 const Login = () => {
+  const nav = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loadCir, setLoadCir] = useState(true);
   let [errors, setErrors] = useState({});
   let emailSpan = useRef("");
   let passwordSpan = useRef("");
   let Inp = useRef("");
-
-  useEffect(() => {
-    if (Inp.current.length === undefined) {
-      passwordSpan.current.style.top = "-1rem";
-      emailSpan.current.style.top = "-1rem";
-    }
-  }, []);
 
   let validationForm = () => {
     const newErrors = {};
@@ -78,11 +78,40 @@ const Login = () => {
       }
     }
   };
-  const handSubmit = (e) => {
+  const handSubmit = async (e) => {
     e.preventDefault();
     if (validationForm()) {
       setLoadCir(false);
       try {
+        const res = await fetch(`${base_url_front}/user/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        });
+
+        const data = await res.json();
+        if (res.status === 200) {
+          localStorage.setItem("jwt", data.token);
+          dispatch(getToken());
+          nav("/protected/home");
+          setFormData({
+            password: "",
+            email: "",
+          });
+          setLoadCir(true);
+          toast("Login SucessFull");
+        } else if (
+          data.message === "Email not found" ||
+          data.message === "Password does not match" ||
+          data.message === "Email and password are required" ||
+          data.message === "Internal server error"
+        ) {
+          toast(data.message);
+          setLoadCir(true);
+        }
       } catch (error) {
         return error;
       }
@@ -137,13 +166,23 @@ const Login = () => {
               Log in
             </Button>
           </form>
-          <span style={{display:loadCir?"none":"block",position:"absolute",bottom:"3rem"}}><Loader/></span>
+          <span
+            style={{
+              display: loadCir ? "none" : "block",
+              position: "absolute",
+              bottom: "3rem",
+            }}
+          >
+            <Loader />
+          </span>
           <button className="login-button">Forgot password?</button>
         </div>
         <div className="login-bottom">
           <span>
             Don't have an account?{" "}
-            <NavLink to={"/register"}><button className="login-dont"> Sign up</button></NavLink>
+            <NavLink to={"/register"}>
+              <button className="login-dont"> Sign up</button>
+            </NavLink>
           </span>
         </div>
       </div>
@@ -255,7 +294,7 @@ const Wrapper = styled.div`
             position: absolute;
             transition: top 0.2s ease;
             z-index: 2;
-            top: 0.8rem;
+            top: -1rem;
           }
           input {
             width: 100%;
