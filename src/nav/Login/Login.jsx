@@ -96,7 +96,7 @@ const Login = () => {
         if (res.status === 200) {
           localStorage.setItem("jwt", data.token);
           dispatch(getToken());
-          nav("/protected/home");
+          nav("/home");
           setFormData({
             password: "",
             email: "",

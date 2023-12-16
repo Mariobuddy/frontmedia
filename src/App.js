@@ -8,6 +8,11 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Loader from "./components/Loader/Loader";
 const LazyLogin = lazy(() => import("./nav/Login/Login"));
 const LazyHome = lazy(() => import("./nav/Home/Home"));
+const LazyPostSection = lazy(() => import("./nav/Home/PostSection"));
+const LazyCreate = lazy(() => import("./nav/Home/CreatePost"));
+const LazySearch = lazy(() => import("./nav/Home/Search"));
+const LazyProfile = lazy(() => import("./nav/Home/Profile"));
+const LazyMessage = lazy(() => import("./nav/Home/Message"));
 const LazyRegistration = lazy(() => import("./nav/Registration/Registraton"));
 
 const App = () => {
@@ -47,11 +52,10 @@ const App = () => {
         <Routes>
           {/* -----------------------------------Protected Routes--------------------------------------- */}
 
-          <Route path="/protected" element={<ProtectedRoutes isAuth={isAuth}/>}>
-            <Route
-              exact
-              path="home"
-              element={
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoutes isAuth={isAuth}>
                 <Suspense
                   fallback={
                     <div className="cirDiv">
@@ -60,6 +64,96 @@ const App = () => {
                   }
                 >
                   <LazyHome />
+                </Suspense>
+              </ProtectedRoutes>
+            }
+          >
+            <Route
+              index
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyPostSection />
+                </Suspense>
+              }
+            />
+            <Route
+              exact
+              path="postsection"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyPostSection />
+                </Suspense>
+              }
+            />
+            <Route
+              exact
+              path="createpost"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyCreate />
+                </Suspense>
+              }
+            />
+            <Route
+              exact
+              path="profile"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyProfile />
+                </Suspense>
+              }
+            />
+            <Route
+              exact
+              path="message"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazyMessage />
+                </Suspense>
+              }
+            />
+            <Route
+              exact
+              path="search"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="cirDiv">
+                      <Loader />
+                    </div>
+                  }
+                >
+                  <LazySearch />
                 </Suspense>
               }
             />
