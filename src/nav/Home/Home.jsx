@@ -6,10 +6,10 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useSelector, useDispatch } from "react-redux";
 import LazyLoading from "../../components/Lazy/LazyLoading";
 import { fetchAuth } from "../../redux/reducers/authorized";
-import { AiFillMessage } from "react-icons/ai";
 import { CgAddR } from "react-icons/cg";
 import { IoSearch } from "react-icons/io5";
 import { IoMdHome } from "react-icons/io";
+import { BiMessageRounded } from "react-icons/bi";
 
 const Home = () => {
   const location = useLocation();
@@ -84,7 +84,7 @@ const Home = () => {
             onClick={() => handnav("/home/message")}
           >
             <div className="in">
-              <AiFillMessage className="icon" />
+              <BiMessageRounded className="icon" />
               Messages
             </div>
           </NavLink>
@@ -129,11 +129,11 @@ const Wrapper = styled.div`
   display: flex;
   z-index: 999;
   position: absolute;
+  background-color: black;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
-  background-color: black;
 
   .mobile {
     display: none;
@@ -158,7 +158,7 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     margin-left: 16vw;
-    padding-top: 5.5rem;
+    padding-top: 4rem;
   }
 
   .left {
@@ -173,6 +173,7 @@ const Wrapper = styled.div`
     left: 0;
     z-index: 40000;
     border-right: 1px solid #505050;
+    background-color: black;
 
     .link {
       display: flex;

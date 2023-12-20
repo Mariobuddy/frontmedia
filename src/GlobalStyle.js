@@ -12,7 +12,6 @@ export const GlobalStyle = createGlobalStyle`
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
   text-decoration: none;
-
 /* 
 font-family: 'Alkatra', cursive;
 font-family: 'Allura', cursive;

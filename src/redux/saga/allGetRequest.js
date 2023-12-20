@@ -7,12 +7,11 @@ import {
 } from "../reducers/authorized";
 import { base_url_front } from "./../../components/Base_Url/Base_Url";
 import { fetchpost, fetchpostError, fetchpostSuccess } from "../reducers/post";
-
-
-
-
-
-
+import {
+  fetchAllUsers,
+  fetchAllUsersError,
+  fetchAllUsersSuccess,
+} from "../reducers/allUsers";
 
 function* fetchAuthAsync() {
   try {
@@ -32,11 +31,7 @@ export function* authSaga() {
 
 export const mainAuthSaga = [fork(authSaga)];
 
-
-
-
-
-
+// ----------------------------------------------------------------------------------------
 
 function* fetchPostAsync() {
   try {
@@ -56,8 +51,23 @@ export function* postSaga() {
 
 export const mainPostSaga = [fork(postSaga)];
 
+// ----------------------------------------------------------------------------------------
 
+function* fetchAllUsersAsync() {
+  try {
+    const allUsers = yield axios.get(`${base_url_front}/user/alluser`, {
+      method: "GET",
+      withCredentials: true,
+    });
+    yield put(fetchAllUsersSuccess(allUsers.data.user)); // Dispatch a success action
+  } catch (error) {
+    yield put(fetchAllUsersError(error.message)); // Dispatch an error action
+  }
+}
 
+export function* allUsersSaga() {
+  yield takeLatest(fetchAllUsers.type, fetchAllUsersAsync);
+}
 
-
+export const mainAllUsersSaga = [fork(allUsersSaga)];
 
