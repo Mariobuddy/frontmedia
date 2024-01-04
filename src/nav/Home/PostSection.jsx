@@ -33,6 +33,8 @@ const PostSection = () => {
               ownerName={val?.owner?.name}
               ownerImage={val?.owner?.avatar?.url}
               user={authSucess?._id}
+              isAccount={false}
+              isDelete={false}
             />
           );
         })}
@@ -125,6 +127,8 @@ const Wrapper = styled.div`
           margin-left: 1rem;
           cursor: pointer;
           margin-top: 1.2rem;
+          width: 10rem;
+          overflow: hidden;
         }
       }
 

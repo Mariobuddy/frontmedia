@@ -13,6 +13,8 @@ import {
   fetchAllUsersSuccess,
 } from "../reducers/allUsers";
 
+import { fetchlikes,fetchlikesError,fetchlikesSuccess } from "../reducers/likes";
+
 function* fetchAuthAsync() {
   try {
     const auth = yield axios.get(`${base_url_front}/user/profile`, {
@@ -70,4 +72,24 @@ export function* allUsersSaga() {
 }
 
 export const mainAllUsersSaga = [fork(allUsersSaga)];
+
+// ----------------------------------------------------------------------------------------
+
+function* fetchLikesAsync(action) {
+  try {
+    const likes = yield axios.get(`${base_url_front}/post/likeunlike/${action.payload}`, {
+      method: "GET",
+      withCredentials: true,
+    });
+    yield put(fetchlikesSuccess(likes.data)); // Dispatch a success action
+  } catch (error) {
+    yield put(fetchlikesError(error.message)); // Dispatch an error action
+  }
+}
+
+export function* likesSaga() {
+  yield takeLatest(fetchlikes.type, fetchLikesAsync);
+}
+
+export const mainLikesSaga = [fork(likesSaga)];
 

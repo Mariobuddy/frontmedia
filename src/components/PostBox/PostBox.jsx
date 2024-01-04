@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
-// import { MdDeleteOutline } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
 import LazyLoading from "../Lazy/LazyLoading";
 import { FiMessageCircle } from "react-icons/fi";
 import { Button } from "react-bootstrap";
@@ -11,6 +11,8 @@ import { useDispatch } from "react-redux";
 import { fetchpost } from "../../redux/reducers/post";
 import { FaRegHeart } from "react-icons/fa";
 import { base_url_front } from "../Base_Url/Base_Url";
+import { IoMdClose } from "react-icons/io";
+import { toast } from "react-toastify";
 
 const PostBox = ({
   postId,
@@ -26,20 +28,78 @@ const PostBox = ({
   user,
 }) => {
   const [heart, setHeart] = useState(false);
+  const [popPost, setPopPost] = useState("");
+  const [popPost2, setPopPost2] = useState("");
+  const [closeLikes, setCloseLikes] = useState(false);
+  const [closeComment, setCloseComment] = useState(false);
+  const [closeComment2, setCloseComment2] = useState(false);
 
   const dispatch = useDispatch();
 
   const handHeart = async () => {
     setHeart(!heart);
+    if (isAccount) {
+    } else {
+      try {
+        const res = await fetch(`${base_url_front}/post/likeunlike/${postId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (res.status === 200) {
+          dispatch(fetchpost());
+        }
+      } catch (error) {
+        return error;
+      }
+    }
+  };
+
+  const handPost = async (e) => {
+    e.preventDefault();
     try {
-      await fetch(`${base_url_front}/post/likeunlike/${postId}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${base_url_front}/post/addupdatecomment/${postId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ comment: popPost }),
+        }
+      );
+      if (res.status === 200) {
+        dispatch(fetchpost());
+        setPopPost("");
+      }
     } catch (error) {
       return error;
     }
-    dispatch(fetchpost());
+  };
+  const handPost2 = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(
+        `${base_url_front}/post/addupdatecomment/${postId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ comment: popPost2 }),
+        }
+      );
+      if (res.status === 200) {
+        dispatch(fetchpost());
+        setPopPost2("");
+      }
+    } catch (error) {
+      return error;
+    }
   };
 
   useEffect(() => {
@@ -50,11 +110,161 @@ const PostBox = ({
     });
   }, [likes, user]);
 
-  const handViewCom = () => {};
+  const reversedData = [...comment].reverse();
 
-  const handLikes = () => {};
+  const handViewCom = () => {
+    setCloseComment(true);
+    setCloseLikes(false);
+  };
+
+
+  const delCom = async (id) => {
+    try {
+      const res = await fetch(`${base_url_front}/post/deletecomment/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ commentId: id }),
+
+      });
+      if (res.status === 200) {
+        toast("Comment Delete");
+        dispatch(fetchpost());
+      }
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const handViewCom2 = () => {
+    setCloseComment(false);
+    setCloseLikes(false);
+    setCloseComment2(true);
+  };
+
+  const handLikes = () => {
+    setCloseComment(false);
+    setCloseLikes(true);
+  };
+
+  const handChange = (e) => {
+    setPopPost(e.target.value);
+  };
+
+  const handChange2 = (e) => {
+    setPopPost2(e.target.value);
+  };
+
   return (
     <Wrapper>
+      <div
+        className="com2Pop"
+        style={{ display: closeComment2 ? "block" : "none" }}
+      >
+        <p className="com2top">Comments</p>
+        <div className="inputcom">
+          <input
+            type="text"
+            value={popPost2}
+            onChange={handChange2}
+            placeholder="Add Comment"
+          />
+          <Button
+            onClick={handPost2}
+            variant="primary" // Change this to customize the button color
+            style={{
+              borderRadius: "5px", // Example: set border radius
+              fontSize: "14px", // Example: set font size
+              width: "20%",
+              height: "3rem",
+              display: popPost2.length === 0 ? "none" : "block",
+            }}
+            // onClick={handSubmit}
+          >
+            Post
+          </Button>
+        </div>
+        <IoMdClose
+          className="ioclose"
+          onClick={() => setCloseComment2(false)}
+        />
+        {reversedData?.map((val, i) => {
+          return (
+            <div key={i} className="innercom2">
+              <div key={i} className="mainpostseccom2">
+                <div className="leftpostcom2">
+                  <LazyLoading src={val?.user?.avatar?.url} />
+                  <p>{val?.user?.name}</p>
+                </div>
+                <span>{val?.comment}</span>
+                {isAccount || val.user?._id === user ? (
+                  <MdDeleteOutline
+                    onClick={() => delCom(val?._id)}
+                    style={{
+                      fontSize: "2rem",
+                      color: "red",
+                      cursor: "pointer",
+                    }}
+                  />
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="comPop"
+        style={{ display: closeComment ? "block" : "none" }}
+      >
+        <p className="comtop">Comments</p>
+        <IoMdClose className="ioclose" onClick={() => setCloseComment(false)} />
+        {reversedData?.map((val, i) => {
+          return (
+            <div key={i} className="innercom">
+              <div key={i} className="mainpostseccom">
+                <div className="leftpostcom">
+                  <LazyLoading src={val?.user?.avatar?.url} />
+                  <p>{val?.user?.name}</p>
+                </div>
+                <span>{val?.comment}</span>
+                {isAccount || val.user?._id === user ? (
+                  <MdDeleteOutline
+                    onClick={() => delCom(val?._id)}
+                    style={{
+                      fontSize: "2rem",
+                      color: "red",
+                      cursor: "pointer",
+                    }}
+                  />
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="likesPop"
+        style={{ display: closeLikes ? "block" : "none" }}
+      >
+        <p className="liketop">Likes</p>
+        <IoMdClose className="ioclose" onClick={() => setCloseLikes(false)} />
+
+        {likes?.map((val, i) => {
+          return (
+            <div key={i} className="innerLikes">
+              <div key={i} className="mainpostsec">
+                <div className="leftpost">
+                  <LazyLoading src={val?.avatar?.url} />
+                  <p>{val?.name}</p>
+                </div>
+                <span>Follow</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
       <div className="userpost">
         <div className="userimage">
           <LazyLoading src={ownerImage} />
@@ -68,7 +278,11 @@ const PostBox = ({
       <LazyLoading src={postImage} />
       <div className="useraction">
         {heart ? (
-          <FaHeart className="posticon" style={{color:"red"}} onClick={handHeart} />
+          <FaHeart
+            className="posticon"
+            style={{ color: "red" }}
+            onClick={handHeart}
+          />
         ) : (
           <FaRegHeart
             className="posticon"
@@ -76,32 +290,43 @@ const PostBox = ({
             style={{ color: "#FFFFFF" }}
           />
         )}
-        <FiMessageCircle className="posticon" />
+        <FiMessageCircle className="posticon" onClick={handViewCom2} />
       </div>
-      <span className="userlikes" onClick={handLikes}>
-        {likes.length} {likes.length <= 1 ? "Like" : "likes"}
+      <span className="userlikes">
+        <span onClick={handLikes}>
+          {likes.length} {likes.length <= 1 ? "Like" : "likes"}
+        </span>
       </span>
       <span className="usercaption">
         <span>{ownerName}</span> {caption}
       </span>
-      <span className="viewcom" onClick={handViewCom}>
-        View all {comment.length} {comment.length <= 1 ? "Comment" : "Comments"}
+      <span className="viewcom">
+        <span onClick={handViewCom}>
+          View all {comment.length}{" "}
+          {comment.length <= 1 ? "Comment" : "Comments"}
+        </span>
       </span>
       <span className="firstcom">
-        <span>{comment[0]?.user?.name}</span>
-        {comment[0]?.comment}
+        <span>{comment[comment.length - 1]?.user?.name}</span>
+        {comment[comment.length - 1]?.comment}
       </span>
       <div className="inputcom">
-        <input type="text" placeholder="Add Comment" />
+        <input
+          type="text"
+          value={popPost}
+          onChange={handChange}
+          placeholder="Add Comment"
+        />
         <Button
+          onClick={handPost}
           variant="primary" // Change this to customize the button color
           style={{
             borderRadius: "5px", // Example: set border radius
             fontSize: "14px", // Example: set font size
             width: "10%",
             height: "3rem",
+            display: popPost.length === 0 ? "none" : "block",
           }}
-          // onClick={handSubmit}
         >
           Post
         </Button>
@@ -124,10 +349,236 @@ const floatAnimation = keyframes`
 
 const Wrapper = styled.div`
   .likesPop {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    background-color: green;
+    position: fixed;
+    z-index: 999999;
+    top: 10%;
+    left: 40%;
+    background-color: #434242;
+    width: 30%;
+    border-radius: 0.4rem;
+    height: 80%;
+    overflow: auto;
+
+    .liketop {
+      font-size: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .innerLikes {
+      .mainpostsec {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        margin: 2rem 0rem;
+        align-items: center;
+        font-size: 1.4rem;
+        .leftpost {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .lazy-load-image-background {
+            width: 5rem;
+            height: 5rem;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: center;
+              border-radius: 50%;
+            }
+          }
+          p {
+            color: #ffffff;
+            margin-left: 1rem;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            width: 10rem;
+            overflow: hidden;
+          }
+        }
+
+        span {
+          color: #1f79ff;
+          font-size: 1.4rem;
+          cursor: pointer;
+          height: inherit;
+        }
+      }
+    }
+
+    .ioclose {
+      position: absolute;
+      font-size: 3rem;
+      cursor: pointer;
+      right: 1rem;
+      top: 1rem;
+    }
+  }
+
+  .comPop {
+    position: fixed;
+    z-index: 999999;
+    top: 10%;
+    left: 40%;
+    background-color: #434242;
+    width: 30%;
+    border-radius: 0.4rem;
+    height: 80%;
+    overflow: auto;
+    padding: 0rem 2rem;
+
+    .comtop {
+      font-size: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .innercom {
+      .mainpostseccom {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+        margin: 2rem 0rem;
+        align-items: center;
+        font-size: 1.2rem;
+        .leftpostcom {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .lazy-load-image-background {
+            width: 4rem;
+            height: 4rem;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: center;
+              border-radius: 50%;
+            }
+          }
+          p {
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            width: fit-content;
+            max-width: 15rem;
+            overflow: hidden;
+            font-size: 1.4rem;
+            margin-right: 0.8rem;
+          }
+        }
+
+        span {
+          color: #d3c9c9;
+          font-size: 1.4rem;
+          height: inherit;
+          width: 80%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .ioclose {
+      position: absolute;
+      font-size: 3rem;
+      cursor: pointer;
+      right: 1rem;
+      top: 1rem;
+    }
+  }
+  .com2Pop {
+    position: fixed;
+    z-index: 999999;
+    top: 10%;
+    left: 40%;
+    background-color: #434242;
+    width: 30%;
+    border-radius: 0.4rem;
+    height: 80%;
+    overflow: auto;
+    padding: 0rem 2rem;
+
+    .inputcom {
+      width: 100%;
+      border-bottom: 2px solid gray;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      input {
+        border: none;
+        outline: none;
+        height: 4rem;
+        background-color: transparent;
+        width: 100%;
+        color: #ffffff;
+        font-size: 1.4rem;
+      }
+    }
+
+    .com2top {
+      font-size: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .innercom2 {
+      .mainpostseccom2 {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+        margin: 2rem 0rem;
+        align-items: center;
+        font-size: 1.2rem;
+        .leftpostcom2 {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .lazy-load-image-background {
+            width: 4rem;
+            height: 4rem;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: center;
+              border-radius: 50%;
+            }
+          }
+          p {
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            width: fit-content;
+            max-width: 15rem;
+            overflow: hidden;
+            font-size: 1.4rem;
+            margin-right: 0.8rem;
+          }
+        }
+
+        span {
+          color: #d3c9c9;
+          font-size: 1.4rem;
+          height: inherit;
+          width: 80%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .ioclose {
+      position: absolute;
+      font-size: 3rem;
+      cursor: pointer;
+      right: 1rem;
+      top: 1rem;
+    }
   }
   width: 100%;
   height: 60rem;
@@ -198,7 +649,10 @@ const Wrapper = styled.div`
   .userlikes {
     width: 90%;
     font-size: 1.4rem;
-    cursor: pointer;
+
+    span {
+      cursor: pointer;
+    }
   }
   .usercaption {
     width: 90%;
@@ -211,11 +665,23 @@ const Wrapper = styled.div`
   .viewcom {
     width: 90%;
     font-size: 1.4rem;
-    cursor: pointer;
+    color: #aaa7a7;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    span {
+      cursor: pointer;
+    }
   }
   .firstcom {
     width: 90%;
     font-size: 1.2rem;
+    color: #807c7c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     span {
       font-size: 1.5rem;
       margin-right: 1rem;
@@ -225,13 +691,16 @@ const Wrapper = styled.div`
   .inputcom {
     width: 90%;
     border-bottom: 2px solid gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     input {
       border: none;
       outline: none;
       height: 4rem;
       background-color: transparent;
-      width: 90%;
+      width: 100%;
       color: #ffffff;
       font-size: 1.4rem;
     }
