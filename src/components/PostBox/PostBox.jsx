@@ -13,6 +13,8 @@ import { FaRegHeart } from "react-icons/fa";
 import { base_url_front } from "../Base_Url/Base_Url";
 import { IoMdClose } from "react-icons/io";
 import { toast } from "react-toastify";
+import { fetchSinglePostLoading } from "../../redux/reducers/authorized";
+import BoxPop from "../BoxPop/BoxPop";
 
 const PostBox = ({
   postId,
@@ -38,22 +40,23 @@ const PostBox = ({
 
   const handHeart = async () => {
     setHeart(!heart);
-    if (isAccount) {
-    } else {
-      try {
-        const res = await fetch(`${base_url_front}/post/likeunlike/${postId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-        if (res.status === 200) {
+    try {
+      const res = await fetch(`${base_url_front}/post/likeunlike/${postId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      if (res.status === 200) {
+        if (isAccount) {
+          dispatch(fetchSinglePostLoading());
+        } else {
           dispatch(fetchpost());
         }
-      } catch (error) {
-        return error;
       }
+    } catch (error) {
+      return error;
     }
   };
 
@@ -72,7 +75,11 @@ const PostBox = ({
         }
       );
       if (res.status === 200) {
-        dispatch(fetchpost());
+        if (isAccount) {
+          dispatch(fetchSinglePostLoading());
+        } else {
+          dispatch(fetchpost());
+        }
         setPopPost("");
       }
     } catch (error) {
@@ -94,7 +101,11 @@ const PostBox = ({
         }
       );
       if (res.status === 200) {
-        dispatch(fetchpost());
+        if (isAccount) {
+          dispatch(fetchSinglePostLoading());
+        } else {
+          dispatch(fetchpost());
+        }
         setPopPost2("");
       }
     } catch (error) {
@@ -117,21 +128,26 @@ const PostBox = ({
     setCloseLikes(false);
   };
 
-
   const delCom = async (id) => {
     try {
-      const res = await fetch(`${base_url_front}/post/deletecomment/${postId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ commentId: id }),
-
-      });
+      const res = await fetch(
+        `${base_url_front}/post/deletecomment/${postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ commentId: id }),
+        }
+      );
       if (res.status === 200) {
         toast("Comment Delete");
-        dispatch(fetchpost());
+        if (isAccount) {
+          dispatch(fetchSinglePostLoading());
+        } else {
+          dispatch(fetchpost());
+        }
       }
     } catch (error) {
       return error;
@@ -159,112 +175,40 @@ const PostBox = ({
 
   return (
     <Wrapper>
-      <div
-        className="com2Pop"
-        style={{ display: closeComment2 ? "block" : "none" }}
-      >
-        <p className="com2top">Comments</p>
-        <div className="inputcom">
-          <input
-            type="text"
-            value={popPost2}
-            onChange={handChange2}
-            placeholder="Add Comment"
-          />
-          <Button
-            onClick={handPost2}
-            variant="primary" // Change this to customize the button color
-            style={{
-              borderRadius: "5px", // Example: set border radius
-              fontSize: "14px", // Example: set font size
-              width: "20%",
-              height: "3rem",
-              display: popPost2.length === 0 ? "none" : "block",
-            }}
-            // onClick={handSubmit}
-          >
-            Post
-          </Button>
-        </div>
-        <IoMdClose
-          className="ioclose"
-          onClick={() => setCloseComment2(false)}
-        />
-        {reversedData?.map((val, i) => {
-          return (
-            <div key={i} className="innercom2">
-              <div key={i} className="mainpostseccom2">
-                <div className="leftpostcom2">
-                  <LazyLoading src={val?.user?.avatar?.url} />
-                  <p>{val?.user?.name}</p>
-                </div>
-                <span>{val?.comment}</span>
-                {isAccount || val.user?._id === user ? (
-                  <MdDeleteOutline
-                    onClick={() => delCom(val?._id)}
-                    style={{
-                      fontSize: "2rem",
-                      color: "red",
-                      cursor: "pointer",
-                    }}
-                  />
-                ) : null}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div
-        className="comPop"
-        style={{ display: closeComment ? "block" : "none" }}
-      >
-        <p className="comtop">Comments</p>
-        <IoMdClose className="ioclose" onClick={() => setCloseComment(false)} />
-        {reversedData?.map((val, i) => {
-          return (
-            <div key={i} className="innercom">
-              <div key={i} className="mainpostseccom">
-                <div className="leftpostcom">
-                  <LazyLoading src={val?.user?.avatar?.url} />
-                  <p>{val?.user?.name}</p>
-                </div>
-                <span>{val?.comment}</span>
-                {isAccount || val.user?._id === user ? (
-                  <MdDeleteOutline
-                    onClick={() => delCom(val?._id)}
-                    style={{
-                      fontSize: "2rem",
-                      color: "red",
-                      cursor: "pointer",
-                    }}
-                  />
-                ) : null}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div
-        className="likesPop"
-        style={{ display: closeLikes ? "block" : "none" }}
-      >
-        <p className="liketop">Likes</p>
-        <IoMdClose className="ioclose" onClick={() => setCloseLikes(false)} />
-
-        {likes?.map((val, i) => {
-          return (
-            <div key={i} className="innerLikes">
-              <div key={i} className="mainpostsec">
-                <div className="leftpost">
-                  <LazyLoading src={val?.avatar?.url} />
-                  <p>{val?.name}</p>
-                </div>
-                <span>Follow</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <BoxPop
+        popIt={closeComment2}
+        data={reversedData}
+        setBox={setCloseComment2}
+        name={reversedData.length <= 1 ? "Comment" : "Comments"}
+        type={"comment"}
+        user={user}
+        isAccount={isAccount}
+        delCom={delCom}
+        handChange2={handChange2}
+        handPost2={handPost2}
+        popPost2={popPost2}
+        inner={"top"}
+      />
+      <BoxPop
+        popIt={closeComment}
+        data={reversedData}
+        setBox={setCloseComment}
+        name={reversedData.length <= 1 ? "Comment" : "Comments"}
+        type={"comment"}
+        user={user}
+        isAccount={isAccount}
+        delCom={delCom}
+        handChange2={handChange}
+        handPost2={handPost}
+        popPost2={popPost}
+      />
+      <BoxPop
+        popIt={closeLikes}
+        data={likes}
+        setBox={setCloseLikes}
+        name={likes.length <= 1 ? "Like" : "Likes"}
+        type={"like"}
+      />
       <div className="userpost">
         <div className="userimage">
           <LazyLoading src={ownerImage} />

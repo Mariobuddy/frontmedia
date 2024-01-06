@@ -158,7 +158,6 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     margin-left: 16vw;
-    padding-top: 4rem;
   }
 
   .left {

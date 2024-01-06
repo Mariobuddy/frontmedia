@@ -3,7 +3,8 @@ import {
   mainAuthSaga,
   mainPostSaga,
   mainAllUsersSaga,
-  mainLikesSaga
+  mainLikesSaga,
+  mainSinglePostSaga
 } from "./allGetRequest";
 
 export default function* rootSaga() {
@@ -11,6 +12,7 @@ export default function* rootSaga() {
     ...mainAuthSaga,
     ...mainPostSaga,
     ...mainAllUsersSaga,
-    ...mainLikesSaga
+    ...mainLikesSaga,
+    ...mainSinglePostSaga
   ]);
 }

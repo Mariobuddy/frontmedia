@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect} from "react";
 import styled from "styled-components";
 import PostBox from "../../components/PostBox/PostBox";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,6 +12,8 @@ const PostSection = () => {
   const { postSucess } = useSelector((state) => state.post);
   const { allUsersSucess } = useSelector((state) => state.allusers);
   const { authSucess } = useSelector((state) => state.authorized);
+  // console.log(allUsersSucess);
+  // console.log(authSucess);
   useEffect(() => {
     dispatch(fetchpost());
     dispatch(fetchAllUsers());
@@ -51,7 +53,11 @@ const PostSection = () => {
                 <LazyLoading src={val?.avatar?.url} />
                 <p>{val?.name}</p>
               </div>
-              <span>Follow</span>
+              <span>
+                {authSucess?.following?.find((inner) => val._id === inner._id)
+                  ? "Following"
+                  : "Follow"}
+              </span>
             </div>
           );
         })}
@@ -65,6 +71,7 @@ export default PostSection;
 const Wrapper = styled.div`
   width: 100%;
   height: fit-content;
+  padding-top: 4rem;
   display: flex;
   justify-content: space-around;
   background-color: black;

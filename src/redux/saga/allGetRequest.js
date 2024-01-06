@@ -4,6 +4,9 @@ import {
   fetchAuth,
   fetchAuthError,
   fetchAuthSuccess,
+  fetchSinglePostError,
+  fetchSinglePostLoading,
+  fetchSinglePostSuccess,
 } from "../reducers/authorized";
 import { base_url_front } from "./../../components/Base_Url/Base_Url";
 import { fetchpost, fetchpostError, fetchpostSuccess } from "../reducers/post";
@@ -13,7 +16,11 @@ import {
   fetchAllUsersSuccess,
 } from "../reducers/allUsers";
 
-import { fetchlikes,fetchlikesError,fetchlikesSuccess } from "../reducers/likes";
+import {
+  fetchlikes,
+  fetchlikesError,
+  fetchlikesSuccess,
+} from "../reducers/likes";
 
 function* fetchAuthAsync() {
   try {
@@ -77,10 +84,13 @@ export const mainAllUsersSaga = [fork(allUsersSaga)];
 
 function* fetchLikesAsync(action) {
   try {
-    const likes = yield axios.get(`${base_url_front}/post/likeunlike/${action.payload}`, {
-      method: "GET",
-      withCredentials: true,
-    });
+    const likes = yield axios.get(
+      `${base_url_front}/post/likeunlike/${action.payload}`,
+      {
+        method: "GET",
+        withCredentials: true,
+      }
+    );
     yield put(fetchlikesSuccess(likes.data)); // Dispatch a success action
   } catch (error) {
     yield put(fetchlikesError(error.message)); // Dispatch an error action
@@ -93,3 +103,23 @@ export function* likesSaga() {
 
 export const mainLikesSaga = [fork(likesSaga)];
 
+// ------------------------------------------------------------------------------------------------
+
+
+function* fetchSinglePostAsync() {
+  try {
+    const singlePost = yield axios.get(`${base_url_front}/post/getuserpost`, {
+      method: "GET",
+      withCredentials: true,
+    });
+    yield put(fetchSinglePostSuccess(singlePost.data.posts)); // Dispatch a success action
+  } catch (error) {
+    yield put(fetchSinglePostError(error.message)); // Dispatch an error action
+  }
+}
+
+export function* singlePostSaga() {
+  yield takeLatest(fetchSinglePostLoading.type, fetchSinglePostAsync);
+}
+
+export const mainSinglePostSaga = [fork(singlePostSaga)];

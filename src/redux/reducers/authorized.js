@@ -6,6 +6,9 @@ const authorizedSlice = createSlice({
     authSucess: {},
     authLoading: false,
     authError: false,
+    singlePostLoading: false,
+    singlePostSucess: [],
+    singlePostError: false,
     isAuth: localStorage.getItem("jwt"),
   },
   reducers: {
@@ -23,10 +26,28 @@ const authorizedSlice = createSlice({
       state.authLoading = false;
       state.authError = true;
     },
+    fetchSinglePostLoading: (state) => {
+      state.singlePostLoading = true;
+    },
+    fetchSinglePostSuccess: (state, action) => {
+      state.singlePostLoading = false;
+      state.singlePostSucess = action.payload;
+    },
+    fetchSinglePostError: (state) => {
+      state.singlePostLoading = false;
+      state.singlePostError = true;
+    },
   },
 });
 
-export const { getToken, fetchAuth, fetchAuthError, fetchAuthSuccess } =
-  authorizedSlice.actions;
+export const {
+  getToken,
+  fetchAuth,
+  fetchAuthError,
+  fetchAuthSuccess,
+  fetchSinglePostError,
+  fetchSinglePostLoading,
+  fetchSinglePostSuccess,
+} = authorizedSlice.actions;
 
 export default authorizedSlice.reducer;
